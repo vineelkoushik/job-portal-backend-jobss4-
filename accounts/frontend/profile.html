@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; min-height:100vh; }
+        nav {
+            background:white; padding:18px 40px; display:flex; justify-content:space-between; align-items:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08); position:sticky; top:0; z-index:100;
+        }
+        nav .brand { font-size:24px; font-weight:800; color:#333; }
+        nav .brand span { color:#667eea; }
+        nav .nav-links { display:flex; gap:25px; align-items:center; }
+        nav a { color:#666; text-decoration:none; font-weight:500; }
+        nav a:hover { color:#667eea; }
+
+        .notification-container { position:relative; display:inline-block; cursor:pointer; }
+        .notification-bell { font-size:24px; color:#666; transition:.3s; background:none; border:none; cursor:pointer; }
+        .notification-bell:hover { color:#667eea; transform:scale(1.1); }
+        .notification-badge {
+            position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%;
+            padding:2px 7px; font-size:11px; font-weight:700; min-width:20px; text-align:center;
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        .notification-dropdown {
+            display:none; position:absolute; right:0; top:45px; width:380px; max-height:500px; overflow-y:auto;
+            background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:1000; padding:10px 0;
+        }
+        .notification-dropdown.show { display:block; animation:slideDown 0.3s ease; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
+        .notification-dropdown .header {
+            padding:15px 20px; border-bottom:1px solid #f0f0f0; font-weight:700; color:#333; font-size:16px;
+            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:white;
+            border-radius:16px 16px 0 0; z-index:1;
+        }
+        .notification-dropdown .header .mark-read { font-size:13px; color:#667eea; cursor:pointer; font-weight:500; }
+        .notification-dropdown .header .mark-read:hover { text-decoration:underline; }
+        .notification-item { padding:14px 20px; border-bottom:1px solid #f8f9fa; transition:.3s; cursor:pointer; }
+        .notification-item:hover { background:#f8f9fa; }
+        .notification-item.unread { background:#f0f4ff; border-left:3px solid #667eea; }
+        .notification-item .notif-title { font-weight:600; color:#333; font-size:14px; margin-bottom:4px; }
+        .notification-item .notif-message { color:#666; font-size:13px; line-height:1.5; }
+        .notification-item .notif-time { color:#aaa; font-size:11px; margin-top:4px; }
+        .notification-empty { padding:40px 20px; text-align:center; color:#888; }
+        .notification-empty .icon { font-size:48px; margin-bottom:10px; }
+
+        .container {
+            max-width:560px; margin:40px auto; background:white; border-radius:20px; padding:50px;
+            box-shadow:0 10px 40px rgba(0,0,0,0.1);
+        }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:20px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+        h1 { font-size:30px; color:#333; margin-bottom:5px; }
+        .subtitle { color:#888; margin-bottom:25px; }
+
+        .profile-row {
+            display:flex; padding:14px 0; border-bottom:1px solid #f0f0f0; align-items:center; flex-wrap:wrap; gap:8px;
+        }
+        .profile-row .label { font-weight:600; color:#555; width:110px; flex-shrink:0; }
+        .profile-row .value { color:#333; flex:1; }
+        .profile-row input, .profile-row textarea {
+            width:100%; padding:10px 12px; border:2px solid #e0e0e0; border-radius:8px;
+            font-size:14px; transition:.3s; outline:none; font-family:inherit; background:#f8f9fa;
+        }
+        .profile-row input:focus, .profile-row textarea:focus {
+            border-color:#667eea; background:white; box-shadow:0 0 0 4px rgba(102,126,234,0.1);
+        }
+        .profile-row textarea { height:80px; resize:vertical; }
+
+        .resume-section {
+            margin:15px 0; padding:15px; background:#f8f9fa; border-radius:10px;
+            border:1px dashed #667eea;
+        }
+        .resume-section .resume-status { display:flex; align-items:center; gap:15px; flex-wrap:wrap; }
+        .resume-section .btn-resume-upload {
+            padding:8px 18px; background:#667eea; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;
+        }
+        .resume-section .btn-resume-upload:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(102,126,234,0.4); }
+        .resume-section .btn-resume-delete {
+            padding:8px 18px; background:#ef4444; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:600;
+        }
+        .resume-section .btn-resume-delete:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(239,68,68,0.4); }
+        .resume-section .file-input-wrapper { display:none; }
+
+        .btn-update {
+            width:100%; padding:16px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; border:none; border-radius:10px; font-size:18px; font-weight:600;
+            cursor:pointer; transition:.3s; margin-top:20px;
+        }
+        .btn-update:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(102,126,234,0.4); }
+
+        #message { text-align:center; margin-top:15px; padding:12px; border-radius:8px; font-weight:500; }
+        #message.success { background:#d1fae5; color:#065f46; }
+        #message.error { background:#fee2e2; color:#991b1b; }
+
+        @media (max-width:480px) {
+            .container { padding:25px 15px; }
+            .profile-row { flex-direction:column; align-items:stretch; gap:5px; }
+            .profile-row .label { width:auto; }
+            .notification-dropdown { width:300px; right:-80px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">JOB<span>SS4</span></div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs/">Jobs</a>
+            <a href="/applications/">Applications</a>
+            <a href="/saved-jobs/">Saved Jobs</a>
+
+            <div class="notification-container">
+                <button class="notification-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="header">
+                        <span>📬 Notifications</span>
+                        <span class="mark-read" onclick="markAllRead()">Mark all read</span>
+                    </div>
+                    <div id="notifList">
+                        <div class="notification-empty">
+                            <div class="icon">📭</div>
+                            <p>No notifications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/dashboard/" class="back-link">← Back to Dashboard</a>
+        <h1>👤 My Profile</h1>
+        <p class="subtitle">Keep your information up to date</p>
+
+        <div id="profileData">
+            <div class="profile-row">
+                <span class="label">Username</span>
+                <span class="value" id="username">-</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Email</span>
+                <span class="value" id="email">-</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Role</span>
+                <span class="value" id="role">-</span>
+            </div>
+            <div class="profile-row">
+                <span class="label">Phone</span>
+                <input type="text" id="phone" placeholder="Phone number">
+            </div>
+            <div class="profile-row">
+                <span class="label">Location</span>
+                <input type="text" id="location" placeholder="Your location">
+            </div>
+            <div class="profile-row">
+                <span class="label">Skills</span>
+                <textarea id="skills" placeholder="Python, Django, React..."></textarea>
+            </div>
+
+            <div class="resume-section">
+                <h3 style="margin-bottom:10px;">📄 Resume</h3>
+                <div class="resume-status" id="resumeStatus">
+                    <span id="resumeFileInfo">Not uploaded</span>
+                    <button class="btn-resume-upload" onclick="document.getElementById('resumeFileInput').click()">📤 Upload</button>
+                    <input type="file" id="resumeFileInput" class="file-input-wrapper" accept=".pdf,.doc,.docx" onchange="uploadResume(this.files[0])">
+                    <button class="btn-resume-delete" id="deleteResumeBtn" style="display:none;" onclick="deleteResume()">🗑️ Delete</button>
+                </div>
+                <div id="resumeUploadMessage" style="margin-top:8px;font-size:13px;"></div>
+            </div>
+
+            <button class="btn-update" onclick="updateProfile()">💾 Update Profile</button>
+            <div id="message"></div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("access_token");
+        if (!token) window.location.href = "/login/";
+
+        let currentResume = null;
+        let currentResumeFilename = null;
+
+        async function loadProfile() {
+            try {
+                const response = await fetch("/api/auth/profile/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    document.getElementById("username").textContent = data.username || "-";
+                    document.getElementById("email").textContent = data.email || "-";
+                    document.getElementById("role").textContent = data.role || "-";
+                    document.getElementById("phone").value = data.phone || "";
+                    document.getElementById("location").value = data.location || "";
+                    document.getElementById("skills").value = data.skills || "";
+                    currentResume = data.resume || null;
+                    currentResumeFilename = data.filename || (data.resume ? data.resume.split('/').pop() : null);
+                    updateResumeUI();
+                } else {
+                    document.getElementById("profileData").innerHTML = `<p style="color:red;">Failed to load profile: ${JSON.stringify(data)}</p>`;
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById("profileData").innerHTML = "<p style=\"color:red;\">Something went wrong.</p>";
+            }
+        }
+
+        function updateResumeUI() {
+            const info = document.getElementById("resumeFileInfo");
+            const deleteBtn = document.getElementById("deleteResumeBtn");
+            if (currentResume) {
+                const displayName = currentResumeFilename || currentResume.split('/').pop() || "Resume";
+                info.innerHTML = `<a href="${currentResume}" target="_blank" style="color:#667eea;">📄 ${displayName}</a>`;
+                deleteBtn.style.display = 'inline-block';
+            } else {
+                info.textContent = 'Not uploaded';
+                deleteBtn.style.display = 'none';
+            }
+        }
+
+        async function uploadResume(file) {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append("file", file);
+            const msg = document.getElementById("resumeUploadMessage");
+            msg.textContent = "Uploading...";
+            msg.style.color = "#888";
+            try {
+                const response = await fetch("/api/jobs/resume/", {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer " + token },
+                    body: formData
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentResume = data.file || data.url;
+                    currentResumeFilename = data.filename || (currentResume ? currentResume.split('/').pop() : null);
+                    updateResumeUI();
+                    msg.textContent = "✅ Resume uploaded successfully!";
+                    msg.style.color = "#10b981";
+                } else {
+                    msg.textContent = "❌ " + (data.error || "Failed to upload");
+                    msg.style.color = "#ef4444";
+                }
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "❌ Something went wrong.";
+                msg.style.color = "#ef4444";
+            }
+        }
+
+        async function deleteResume() {
+            if (!confirm("Are you sure you want to delete your resume?")) return;
+            const msg = document.getElementById("resumeUploadMessage");
+            msg.textContent = "Deleting...";
+            msg.style.color = "#888";
+            try {
+                const response = await fetch("/api/jobs/resume/", {
+                    method: "DELETE",
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                if (response.ok) {
+                    msg.textContent = "✅ Resume deleted.";
+                    msg.style.color = "#10b981";
+                    currentResume = null;
+                    currentResumeFilename = null;
+                    updateResumeUI();
+                } else {
+                    const data = await response.json();
+                    msg.textContent = "❌ " + (data.error || "Failed to delete");
+                    msg.style.color = "#ef4444";
+                }
+            } catch (error) {
+                console.error(error);
+                msg.textContent = "❌ Something went wrong.";
+                msg.style.color = "#ef4444";
+            }
+        }
+
+        async function updateProfile() {
+            const payload = {
+                phone: document.getElementById("phone").value,
+                location: document.getElementById("location").value,
+                skills: document.getElementById("skills").value
+            };
+            const message = document.getElementById("message");
+            message.textContent = "Updating...";
+            message.className = "";
+            try {
+                const response = await fetch("/api/auth/profile/", {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    message.textContent = "✅ Profile updated successfully!";
+                    message.className = "success";
+                    loadProfile();
+                } else {
+                    message.textContent = "❌ " + JSON.stringify(data);
+                    message.className = "error";
+                }
+            } catch (error) {
+                console.error(error);
+                message.textContent = "❌ Something went wrong";
+                message.className = "error";
+            }
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayNotifications(data);
+                    updateBadge(data);
+                }
+            } catch (error) { console.error("Error loading notifications:", error); }
+        }
+        function displayNotifications(notifications) {
+            const list = document.getElementById("notifList");
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `<div class="notification-empty"><div class="icon">📭</div><p>No notifications</p></div>`;
+                return;
+            }
+            list.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" onclick="markRead(${notif.id})">
+                    <div class="notif-title">${getNotifIcon(notif.notification_type)} ${notif.notification_type.replace('_', ' ')}</div>
+                    <div class="notif-message">${notif.message}</div>
+                    <div class="notif-time">${new Date(notif.created_at).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        function getNotifIcon(type) {
+            const icons = { 'APPLICATION_SHORTLISTED':'⭐', 'APPLICATION_REJECTED':'❌', 'APPLICATION_HIRED':'🎉', 'NEW_APPLICATION':'📩', 'APPLICATION_SUBMITTED':'📝' };
+            return icons[type] || '📌';
+        }
+        function updateBadge(notifications) {
+            const badge = document.getElementById("notifBadge");
+            const unread = notifications ? notifications.filter(n => !n.is_read).length : 0;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
+        }
+        function toggleNotifications() {
+            const dropdown = document.getElementById("notifDropdown");
+            dropdown.classList.toggle("show");
+            if (dropdown.classList.contains("show")) { loadNotifications(); }
+        }
+        async function markRead(notifId) {
+            try {
+                await fetch(`/api/jobs/notifications/${notifId}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                loadNotifications();
+            } catch (error) { console.error("Error marking read:", error); }
+        }
+        async function markAllRead() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", { headers: { "Authorization": "Bearer " + token } });
+                const data = await response.json();
+                for (const notif of data) {
+                    if (!notif.is_read) {
+                        await fetch(`/api/jobs/notifications/${notif.id}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                    }
+                }
+                loadNotifications();
+                document.getElementById("notifDropdown").classList.remove("show");
+            } catch (error) { console.error("Error marking all read:", error); }
+        }
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.notification-container');
+            if (container && !container.contains(e.target)) { document.getElementById('notifDropdown').classList.remove('show'); }
+        });
+        setInterval(loadNotifications, 30000);
+
+        loadProfile();
+        loadNotifications();
+    </script>
+</body>
+</html>

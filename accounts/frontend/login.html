@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            padding:20px;
+        }
+        .login-container {
+            background:white; border-radius:20px; padding:50px; width:100%; max-width:440px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideUp 0.6s ease;
+        }
+        @keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:15px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+        
+        .logo-container {
+            text-align:center; margin-bottom:25px;
+        }
+        .logo-svg {
+            width:80px; height:80px; display:inline-block;
+        }
+        .logo-text {
+            display:block; font-size:28px; font-weight:800; color:#333; margin-top:8px; letter-spacing:-0.5px;
+        }
+        .logo-text span { color:#667eea; }
+
+        h2 { font-size:28px; color:#333; margin-bottom:5px; text-align:center; }
+        .subtitle { color:#888; margin-bottom:25px; text-align:center; }
+
+        .form-group { margin-bottom:20px; }
+        .form-group label { display:block; font-weight:600; color:#555; margin-bottom:8px; font-size:14px; }
+        .form-group input {
+            width:100%; padding:14px 16px; border:2px solid #e0e0e0; border-radius:10px;
+            font-size:16px; transition:.3s; outline:none;
+        }
+        .form-group input:focus { border-color:#667eea; box-shadow:0 0 0 4px rgba(102,126,234,0.1); }
+        .btn-login {
+            width:100%; padding:16px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; border:none; border-radius:10px; font-size:18px; font-weight:600;
+            cursor:pointer; transition:.3s; margin-top:10px;
+        }
+        .btn-login:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(102,126,234,0.4); }
+        #message { text-align:center; margin-top:20px; padding:12px; border-radius:8px; font-weight:500; }
+        #message.error { background:#fee; color:#c33; }
+        #message.success { background:#efe; color:#3a3; }
+        .register-link { text-align:center; margin-top:25px; color:#888; }
+        .register-link a { color:#667eea; text-decoration:none; font-weight:600; }
+        .register-link a:hover { text-decoration:underline; }
+
+        @media (max-width:480px) { .login-container { padding:30px 20px; } }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <a href="/" class="back-link">← Back to Home</a>
+
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#667eea" />
+                        <stop offset="100%" stop-color="#764ba2" />
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="48" fill="url(#grad)" stroke="white" stroke-width="2"/>
+                <text x="50" y="68" text-anchor="middle" fill="white" font-size="36" font-weight="800" font-family="Arial, sans-serif">JOB</text>
+            </svg>
+            <span class="logo-text">JOB<span>SS4</span></span>
+        </div>
+
+        <h2>Welcome Back</h2>
+        <p class="subtitle">Sign in to continue your journey</p>
+
+        <form id="loginForm" autocomplete="off">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter your username" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" autocomplete="new-password" required>
+            </div>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
+        <div id="message"></div>
+        <div class="register-link">
+            Don't have an account? <a href="/register/">Create one</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const message = document.getElementById("message");
+            message.textContent = "Logging in...";
+            message.className = "";
+            try {
+                const response = await fetch("/api/auth/login/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    localStorage.setItem("access_token", data.access);
+                    if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
+                    message.textContent = "✓ Login successful! Redirecting...";
+                    message.className = "success";
+                    setTimeout(() => window.location.href = "/dashboard/", 1000);
+                } else {
+                    message.textContent = data.error || data.detail || "Invalid credentials";
+                    message.className = "error";
+                }
+            } catch (error) {
+                message.textContent = "Something went wrong. Please try again.";
+                message.className = "error";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

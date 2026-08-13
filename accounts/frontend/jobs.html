@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; }
+        nav {
+            background:white; padding:18px 40px; display:flex; justify-content:space-between; align-items:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08); position:sticky; top:0; z-index:100;
+        }
+        nav .brand { font-size:24px; font-weight:800; color:#333; }
+        nav .brand span { color:#667eea; }
+        nav .nav-links { display:flex; gap:25px; align-items:center; }
+        nav a { color:#666; text-decoration:none; font-weight:500; }
+        nav a:hover { color:#667eea; }
+
+        .notification-container { position:relative; display:inline-block; cursor:pointer; }
+        .notification-bell { font-size:24px; color:#666; transition:.3s; background:none; border:none; cursor:pointer; }
+        .notification-bell:hover { color:#667eea; transform:scale(1.1); }
+        .notification-badge {
+            position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%;
+            padding:2px 7px; font-size:11px; font-weight:700; min-width:20px; text-align:center;
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        .notification-dropdown {
+            display:none; position:absolute; right:0; top:45px; width:380px; max-height:500px; overflow-y:auto;
+            background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:1000; padding:10px 0;
+        }
+        .notification-dropdown.show { display:block; animation:slideDown 0.3s ease; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
+        .notification-dropdown .header {
+            padding:15px 20px; border-bottom:1px solid #f0f0f0; font-weight:700; color:#333; font-size:16px;
+            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:white;
+            border-radius:16px 16px 0 0; z-index:1;
+        }
+        .notification-dropdown .header .mark-read { font-size:13px; color:#667eea; cursor:pointer; font-weight:500; }
+        .notification-dropdown .header .mark-read:hover { text-decoration:underline; }
+        .notification-item { padding:14px 20px; border-bottom:1px solid #f8f9fa; transition:.3s; cursor:pointer; }
+        .notification-item:hover { background:#f8f9fa; }
+        .notification-item.unread { background:#f0f4ff; border-left:3px solid #667eea; }
+        .notification-item .notif-title { font-weight:600; color:#333; font-size:14px; margin-bottom:4px; }
+        .notification-item .notif-message { color:#666; font-size:13px; line-height:1.5; }
+        .notification-item .notif-time { color:#aaa; font-size:11px; margin-top:4px; }
+        .notification-empty { padding:40px 20px; text-align:center; color:#888; }
+        .notification-empty .icon { font-size:48px; margin-bottom:10px; }
+
+        .container { max-width:1200px; margin:0 auto; padding:30px 20px; }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:25px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+
+        .tabs { display:flex; gap:10px; margin-bottom:25px; border-bottom:2px solid #e8ecf1; }
+        .tab-btn { padding:12px 24px; background:none; border:none; font-size:16px; font-weight:600; color:#888; cursor:pointer; transition:.3s; }
+        .tab-btn.active { color:#667eea; border-bottom:3px solid #667eea; }
+        .tab-content { display:none; }
+        .tab-content.active { display:block; }
+
+        .search-container {
+            background:white; border-radius:16px; padding:25px; margin-bottom:30px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.06);
+        }
+        .search-grid {
+            display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:15px; align-items:end;
+        }
+        .search-grid input, .search-grid select {
+            padding:12px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:14px;
+            transition:.3s; outline:none; width:100%;
+        }
+        .search-grid input:focus, .search-grid select:focus { border-color:#667eea; box-shadow:0 0 0 4px rgba(102,126,234,0.1); }
+        .search-grid .search-btn {
+            padding:12px 28px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer; transition:.3s; white-space:nowrap;
+        }
+        .search-grid .search-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.4); }
+
+        .job-card {
+            background:white; border-radius:16px; padding:25px; margin-bottom:20px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.06); border:1px solid #e8ecf1; transition:.3s;
+        }
+        .job-card:hover { transform:translateY(-3px); box-shadow:0 8px 30px rgba(0,0,0,0.1); border-color:#667eea; }
+        .job-card .job-header { display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:15px; }
+        .job-card h2 { color:#333; font-size:22px; }
+        .job-card .company { color:#667eea; font-weight:600; margin:5px 0 10px; }
+        .job-card .job-meta { display:flex; gap:20px; flex-wrap:wrap; color:#888; font-size:14px; margin:10px 0 15px; }
+        .job-card .job-meta span { display:flex; align-items:center; gap:6px; }
+        .job-card .skills { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 15px; }
+        .job-card .skill-tag { background:#e8ecf1; padding:4px 12px; border-radius:20px; font-size:12px; color:#555; }
+
+        .job-actions { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+        .job-actions .apply-btn {
+            padding:10px 24px; background:linear-gradient(135deg,#10b981 0%,#059669 100%);
+            color:white; border:none; border-radius:50px; font-weight:600; cursor:pointer; transition:.3s;
+        }
+        .job-actions .apply-btn:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(16,185,129,0.4); }
+        .job-actions .save-btn {
+            padding:10px 24px; border:2px solid #667eea; border-radius:50px;
+            background:transparent; color:#667eea; font-weight:600; cursor:pointer; transition:.3s;
+        }
+        .job-actions .save-btn:hover { background:#667eea; color:white; }
+        .job-actions .save-btn.saved { background:#667eea; color:white; }
+
+        .pagination { display:flex; justify-content:center; align-items:center; gap:15px; margin:40px 0; }
+        .pagination button {
+            padding:12px 28px; border:none; border-radius:10px;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; font-weight:600; cursor:pointer; transition:.3s;
+        }
+        .pagination button:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.4); }
+        .pagination button:disabled { background:#ccc; cursor:not-allowed; transform:none; box-shadow:none; }
+        .pagination #pageInfo { font-weight:600; color:#555; padding:0 15px; }
+        .no-jobs { text-align:center; padding:60px 20px; color:#888; font-size:18px; }
+
+        .recommendation-card {
+            background:white; border-radius:16px; padding:20px; margin-bottom:15px;
+            border-left:5px solid #fbbf24; transition:.3s;
+        }
+        .recommendation-card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.1); }
+        .match-badge {
+            display:inline-block; padding:4px 12px; border-radius:20px; background:#fbbf24; color:#333; font-weight:600; font-size:13px;
+        }
+
+        @media (max-width:1024px) { .search-grid { grid-template-columns:1fr 1fr; } }
+        @media (max-width:768px) {
+            nav { flex-direction:column; gap:10px; padding:15px 20px; }
+            .search-grid { grid-template-columns:1fr; }
+            .job-card .job-header { flex-direction:column; }
+            .notification-dropdown { width:300px; right:-80px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">JOB<span>SS4</span></div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="/applications/">Applications</a>
+            <a href="/saved-jobs/">Saved</a>
+
+            <div class="notification-container">
+                <button class="notification-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="header">
+                        <span>📬 Notifications</span>
+                        <span class="mark-read" onclick="markAllRead()">Mark all read</span>
+                    </div>
+                    <div id="notifList">
+                        <div class="notification-empty">
+                            <div class="icon">📭</div>
+                            <p>No notifications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="browse" onclick="switchTab('browse')">🔍 Browse Jobs</button>
+            <button class="tab-btn" data-tab="recommendations" onclick="switchTab('recommendations')">🎯 Recommendations</button>
+        </div>
+
+        <div id="tab-browse" class="tab-content active">
+            <div class="search-container">
+                <div class="search-grid">
+                    <input type="text" id="search" placeholder="🔍 Search jobs, companies, skills...">
+                    <input type="text" id="location" placeholder="📍 Location">
+                    <select id="jobType">
+                        <option value="">All Types</option>
+                        <option value="FULL_TIME">Full Time</option>
+                        <option value="PART_TIME">Part Time</option>
+                        <option value="INTERNSHIP">Internship</option>
+                    </select>
+                    <select id="ordering">
+                        <option value="-created_at">Newest First</option>
+                        <option value="created_at">Oldest First</option>
+                        <option value="-salary">Highest Salary</option>
+                        <option value="salary">Lowest Salary</option>
+                    </select>
+                    <button class="search-btn" onclick="loadJobs()">Search</button>
+                </div>
+            </div>
+            <div id="jobs"><div style="text-align:center;padding:40px;color:#888;">Loading jobs...</div></div>
+            <div class="pagination">
+                <button id="prevBtn" onclick="goPrevious()">← Previous</button>
+                <span id="pageInfo">Page 1</span>
+                <button id="nextBtn" onclick="goNext()">Next →</button>
+            </div>
+        </div>
+
+        <div id="tab-recommendations" class="tab-content">
+            <h2 style="margin-bottom:20px;">🎯 Jobs Matched for You</h2>
+            <div id="recommendations"><div style="text-align:center;padding:40px;color:#888;">Loading recommendations...</div></div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("access_token");
+        if (!token) window.location.href = "/login/";
+
+        let currentPage = 1, nextURL = null, previousURL = null;
+        let savedJobIds = new Set();
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById('tab-'+tabId).classList.add('active');
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+            if (tabId === 'recommendations') loadRecommendations();
+        }
+
+        async function toggleSave(jobId, btn) {
+            const isSaved = btn.classList.contains('saved');
+            const method = isSaved ? 'DELETE' : 'POST';
+            try {
+                const response = await fetch(`/api/jobs/jobs/${jobId}/save/`, {
+                    method: method,
+                    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+                });
+                if (response.ok) {
+                    btn.classList.toggle('saved');
+                    btn.textContent = btn.classList.contains('saved') ? '❤️ Saved' : '🤍 Save';
+                    if (btn.classList.contains('saved')) savedJobIds.add(jobId);
+                    else savedJobIds.delete(jobId);
+                } else {
+                    alert('Failed to update saved status.');
+                }
+            } catch (error) { console.error(error); alert('Something went wrong.'); }
+        }
+
+        function buildURL() {
+            const params = new URLSearchParams();
+            const search = document.getElementById("search").value;
+            const location = document.getElementById("location").value;
+            const jobType = document.getElementById("jobType").value;
+            const ordering = document.getElementById("ordering").value;
+            if (search) params.append("search", search);
+            if (location) params.append("location", location);
+            if (jobType) params.append("job_type", jobType);
+            if (ordering) params.append("ordering", ordering);
+            params.append("page", currentPage);
+            return "/api/jobs/?" + params.toString();
+        }
+
+        async function loadJobs(url = null) {
+            const finalURL = url || buildURL();
+            document.getElementById("jobs").innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Loading...</div>';
+            try {
+                const response = await fetch(finalURL);
+                const data = await response.json();
+                if (!response.ok) { document.getElementById("jobs").innerHTML = '<div class="no-jobs">Unable to load jobs.</div>'; return; }
+                nextURL = data.next; previousURL = data.previous;
+                displayJobs(data.results || data);
+                updatePagination();
+            } catch (error) { console.error(error); document.getElementById("jobs").innerHTML = '<div class="no-jobs">Something went wrong.</div>'; }
+        }
+
+        function displayJobs(jobs) {
+            const container = document.getElementById("jobs");
+            container.innerHTML = "";
+            if (!jobs || jobs.length === 0) { container.innerHTML = '<div class="no-jobs">😕 No jobs found.</div>'; return; }
+
+            jobs.forEach(job => {
+                const div = document.createElement("div");
+                div.className = "job-card";
+                const skills = job.required_skills ? job.required_skills.split(",").map(s=>s.trim()) : [];
+                const skillsHTML = skills.map(s => `<span class="skill-tag">${s}</span>`).join("");
+                const isSaved = savedJobIds.has(job.id);
+                div.innerHTML = `
+                    <div class="job-header">
+                        <div>
+                            <h2>${job.title}</h2>
+                            <div class="company">🏢 ${job.company}</div>
+                        </div>
+                        <div class="job-actions">
+                            <button class="apply-btn" onclick="applyJob(${job.id})">Apply Now</button>
+                            <button class="save-btn ${isSaved?'saved':''}" onclick="toggleSave(${job.id}, this)">
+                                ${isSaved ? '❤️ Saved' : '🤍 Save'}
+                            </button>
+                        </div>
+                    </div>
+                    <div class="job-meta">
+                        <span>📍 ${job.location}</span>
+                        <span>💰 ₹${Number(job.salary).toLocaleString("en-IN")}</span>
+                        <span>📋 ${job.job_type}</span>
+                        <span>📅 ${new Date(job.created_at).toLocaleDateString()}</span>
+                    </div>
+                    <div class="skills">${skillsHTML}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updatePagination() {
+            document.getElementById("prevBtn").disabled = !previousURL;
+            document.getElementById("nextBtn").disabled = !nextURL;
+            document.getElementById("pageInfo").textContent = `Page ${currentPage}`;
+        }
+
+        function goNext() { if (!nextURL) return; currentPage++; loadJobs(nextURL); }
+        function goPrevious() { if (!previousURL) return; currentPage--; if (currentPage<1) currentPage=1; loadJobs(previousURL); }
+
+        async function applyJob(jobId) {
+            if (!token) { alert("Please login first."); window.location.href="/login/"; return; }
+            try {
+                const response = await fetch(`/api/jobs/${jobId}/apply/`, {
+                    method: "POST",
+                    headers: { "Authorization": "Bearer " + token, "Content-Type": "application/json" }
+                });
+                const data = await response.json();
+                if (response.ok) alert("✅ Application submitted!");
+                else alert(data.error || "Failed to apply.");
+            } catch (error) { console.error(error); alert("Something went wrong."); }
+        }
+
+        async function loadRecommendations() {
+            const container = document.getElementById("recommendations");
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Loading...</div>';
+            try {
+                const response = await fetch("/api/jobs/recommendations/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (!response.ok) { container.innerHTML = '<div class="no-jobs">' + (data.error || 'Unable to load') + '</div>'; return; }
+                if (!data || data.length === 0) { container.innerHTML = '<div class="no-jobs">No recommendations right now. Add skills to your profile!</div>'; return; }
+                container.innerHTML = data.map(item => `
+                    <div class="recommendation-card">
+                        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+                            <div>
+                                <h3>${item.job.title}</h3>
+                                <p style="color:#667eea;font-weight:600;">${item.job.company}</p>
+                                <p style="color:#888;font-size:14px;">📍 ${item.job.location} · 💰 ₹${Number(item.job.salary).toLocaleString("en-IN")}</p>
+                            </div>
+                            <div>
+                                <span class="match-badge">${item.match_percentage}% Match</span>
+                            </div>
+                        </div>
+                        <p style="margin:10px 0;color:#666;">${item.job.description.substring(0,150)}...</p>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                            <button class="apply-btn" onclick="applyJob(${item.job.id})" style="padding:6px 18px;">Apply</button>
+                            <span style="font-size:13px;color:#888;">Matching skills: ${item.matching_skills.join(', ')}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) { console.error(error); container.innerHTML = '<div class="no-jobs">Something went wrong.</div>'; }
+        }
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayNotifications(data);
+                    updateBadge(data);
+                }
+            } catch (error) { console.error("Error loading notifications:", error); }
+        }
+        function displayNotifications(notifications) {
+            const list = document.getElementById("notifList");
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `<div class="notification-empty"><div class="icon">📭</div><p>No notifications</p></div>`;
+                return;
+            }
+            list.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" onclick="markRead(${notif.id})">
+                    <div class="notif-title">${getNotifIcon(notif.notification_type)} ${notif.notification_type.replace('_', ' ')}</div>
+                    <div class="notif-message">${notif.message}</div>
+                    <div class="notif-time">${new Date(notif.created_at).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        function getNotifIcon(type) {
+            const icons = { 'APPLICATION_SHORTLISTED':'⭐', 'APPLICATION_REJECTED':'❌', 'APPLICATION_HIRED':'🎉', 'NEW_APPLICATION':'📩', 'APPLICATION_SUBMITTED':'📝' };
+            return icons[type] || '📌';
+        }
+        function updateBadge(notifications) {
+            const badge = document.getElementById("notifBadge");
+            const unread = notifications ? notifications.filter(n => !n.is_read).length : 0;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
+        }
+        function toggleNotifications() {
+            const dropdown = document.getElementById("notifDropdown");
+            dropdown.classList.toggle("show");
+            if (dropdown.classList.contains("show")) { loadNotifications(); }
+        }
+        async function markRead(notifId) {
+            try {
+                await fetch(`/api/jobs/notifications/${notifId}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                loadNotifications();
+            } catch (error) { console.error("Error marking read:", error); }
+        }
+        async function markAllRead() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", { headers: { "Authorization": "Bearer " + token } });
+                const data = await response.json();
+                for (const notif of data) {
+                    if (!notif.is_read) {
+                        await fetch(`/api/jobs/notifications/${notif.id}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                    }
+                }
+                loadNotifications();
+                document.getElementById("notifDropdown").classList.remove("show");
+            } catch (error) { console.error("Error marking all read:", error); }
+        }
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.notification-container');
+            if (container && !container.contains(e.target)) { document.getElementById('notifDropdown').classList.remove('show'); }
+        });
+        setInterval(loadNotifications, 30000);
+
+        async function loadSavedIds() {
+            try {
+                const response = await fetch("/api/jobs/saved/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    data.forEach(item => savedJobIds.add(item.job));
+                }
+            } catch (e) {}
+            loadJobs();
+            loadNotifications();
+        }
+
+        loadSavedIds();
+    </script>
+</body>
+</html>

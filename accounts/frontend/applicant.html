@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Seeker - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; min-height:100vh; }
+        nav {
+            background:white; padding:18px 40px; display:flex; justify-content:space-between; align-items:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08);
+        }
+        nav .brand { font-size:24px; font-weight:800; color:#333; }
+        nav .brand span { color:#667eea; }
+        nav .nav-links { display:flex; gap:25px; align-items:center; }
+        nav a { color:#666; text-decoration:none; font-weight:500; }
+        nav a:hover { color:#667eea; }
+
+        .notification-container { position:relative; display:inline-block; cursor:pointer; }
+        .notification-bell { font-size:24px; color:#666; transition:.3s; background:none; border:none; cursor:pointer; }
+        .notification-bell:hover { color:#667eea; transform:scale(1.1); }
+        .notification-badge {
+            position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%;
+            padding:2px 7px; font-size:11px; font-weight:700; min-width:20px; text-align:center;
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        .notification-dropdown {
+            display:none; position:absolute; right:0; top:45px; width:380px; max-height:500px; overflow-y:auto;
+            background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:1000; padding:10px 0;
+        }
+        .notification-dropdown.show { display:block; animation:slideDown 0.3s ease; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
+        .notification-dropdown .header {
+            padding:15px 20px; border-bottom:1px solid #f0f0f0; font-weight:700; color:#333; font-size:16px;
+            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:white;
+            border-radius:16px 16px 0 0; z-index:1;
+        }
+        .notification-dropdown .header .mark-read { font-size:13px; color:#667eea; cursor:pointer; font-weight:500; }
+        .notification-dropdown .header .mark-read:hover { text-decoration:underline; }
+        .notification-item { padding:14px 20px; border-bottom:1px solid #f8f9fa; transition:.3s; cursor:pointer; }
+        .notification-item:hover { background:#f8f9fa; }
+        .notification-item.unread { background:#f0f4ff; border-left:3px solid #667eea; }
+        .notification-item .notif-title { font-weight:600; color:#333; font-size:14px; margin-bottom:4px; }
+        .notification-item .notif-message { color:#666; font-size:13px; line-height:1.5; }
+        .notification-item .notif-time { color:#aaa; font-size:11px; margin-top:4px; }
+        .notification-empty { padding:40px 20px; text-align:center; color:#888; }
+        .notification-empty .icon { font-size:48px; margin-bottom:10px; }
+
+        .container { max-width:1100px; margin:0 auto; padding:40px 20px; }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:25px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+        .page-header { margin-bottom:30px; }
+        .page-header h1 { font-size:32px; color:#333; }
+        .page-header p { color:#888; margin-top:5px; font-size:18px; }
+
+        .cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px,1fr)); gap:25px; }
+        .card { background:white; border-radius:16px; padding:30px; box-shadow:0 2px 10px rgba(0,0,0,0.06); transition:.3s; border:1px solid #e8ecf1; text-align:center; }
+        .card:hover { transform:translateY(-8px); box-shadow:0 12px 40px rgba(0,0,0,0.1); border-color:#667eea; }
+        .card .icon { font-size:48px; margin-bottom:15px; }
+        .card h2 { color:#333; margin-bottom:10px; }
+        .card p { color:#888; line-height:1.6; margin-bottom:20px; }
+        .card button { padding:12px 30px; border:none; border-radius:50px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; font-weight:600; cursor:pointer; transition:.3s; }
+        .card button:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(102,126,234,0.4); }
+
+        @media (max-width:768px) {
+            nav { flex-direction:column; gap:10px; padding:15px 20px; }
+            .page-header h1 { font-size:26px; }
+            .cards { grid-template-columns:1fr; }
+            .notification-dropdown { width:300px; right:-80px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">JOB<span>SS4</span></div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs/">Jobs</a>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="/applications/">Applications</a>
+
+            <div class="notification-container">
+                <button class="notification-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="header">
+                        <span>📬 Notifications</span>
+                        <span class="mark-read" onclick="markAllRead()">Mark all read</span>
+                    </div>
+                    <div id="notifList">
+                        <div class="notification-empty">
+                            <div class="icon">📭</div>
+                            <p>No notifications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/dashboard/" class="back-link">← Back to Dashboard</a>
+        <div class="page-header">
+            <h1>🚀 Job Seeker Dashboard</h1>
+            <p>Find your dream job and grow your career</p>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <div class="icon">🔍</div>
+                <h2>Browse Jobs</h2>
+                <p>Discover thousands of job opportunities.</p>
+                <button onclick="location.href='/jobs/'">Browse Now</button>
+            </div>
+            <div class="card">
+                <div class="icon">📋</div>
+                <h2>My Applications</h2>
+                <p>Track all your applications and status.</p>
+                <button onclick="location.href='/applications/'">View Applications</button>
+            </div>
+            <div class="card">
+                <div class="icon">👤</div>
+                <h2>My Profile</h2>
+                <p>Update your skills, contact info, and resume.</p>
+                <button onclick="location.href='/profile/'">Edit Profile</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("access_token");
+        if (!token) window.location.href = "/login/";
+
+        async function loadNotifications() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayNotifications(data);
+                    updateBadge(data);
+                }
+            } catch (error) { console.error("Error loading notifications:", error); }
+        }
+        function displayNotifications(notifications) {
+            const list = document.getElementById("notifList");
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `<div class="notification-empty"><div class="icon">📭</div><p>No notifications</p></div>`;
+                return;
+            }
+            list.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" onclick="markRead(${notif.id})">
+                    <div class="notif-title">${getNotifIcon(notif.notification_type)} ${notif.notification_type.replace('_', ' ')}</div>
+                    <div class="notif-message">${notif.message}</div>
+                    <div class="notif-time">${new Date(notif.created_at).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        function getNotifIcon(type) {
+            const icons = { 'APPLICATION_SHORTLISTED':'⭐', 'APPLICATION_REJECTED':'❌', 'APPLICATION_HIRED':'🎉', 'NEW_APPLICATION':'📩', 'APPLICATION_SUBMITTED':'📝' };
+            return icons[type] || '📌';
+        }
+        function updateBadge(notifications) {
+            const badge = document.getElementById("notifBadge");
+            const unread = notifications ? notifications.filter(n => !n.is_read).length : 0;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
+        }
+        function toggleNotifications() {
+            const dropdown = document.getElementById("notifDropdown");
+            dropdown.classList.toggle("show");
+            if (dropdown.classList.contains("show")) { loadNotifications(); }
+        }
+        async function markRead(notifId) {
+            try {
+                await fetch(`/api/jobs/notifications/${notifId}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                loadNotifications();
+            } catch (error) { console.error("Error marking read:", error); }
+        }
+        async function markAllRead() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", { headers: { "Authorization": "Bearer " + token } });
+                const data = await response.json();
+                for (const notif of data) {
+                    if (!notif.is_read) {
+                        await fetch(`/api/jobs/notifications/${notif.id}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                    }
+                }
+                loadNotifications();
+                document.getElementById("notifDropdown").classList.remove("show");
+            } catch (error) { console.error("Error marking all read:", error); }
+        }
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.notification-container');
+            if (container && !container.contains(e.target)) { document.getElementById('notifDropdown').classList.remove('show'); }
+        });
+        setInterval(loadNotifications, 30000);
+
+        loadNotifications();
+    </script>
+</body>
+</html>

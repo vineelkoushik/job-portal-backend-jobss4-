@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JOBSS4 - Your Career Journey Begins Here</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        nav .brand {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+        }
+        
+        nav .brand span {
+            color: #fbbf24;
+        }
+
+        nav .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            opacity: 0.8;
+        }
+
+        nav a:hover {
+            opacity: 1;
+            transform: translateY(-2px);
+        }
+
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 20px;
+            text-align: center;
+            color: white;
+        }
+
+        .hero-content {
+            max-width: 800px;
+        }
+
+        .hero h1 {
+            font-size: 64px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.8s ease;
+            background: linear-gradient(135deg, #ffffff 0%, #fbbf24 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 22px;
+            opacity: 0.9;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease;
+            line-height: 1.8;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1.2s ease;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 18px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #667eea;
+            transform: translateY(-3px);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 60px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            animation: fadeInUp 1.4s ease;
+        }
+
+        .stat-item h3 {
+            font-size: 36px;
+            font-weight: 800;
+            color: #fbbf24;
+        }
+
+        .stat-item p {
+            font-size: 16px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .features {
+            background: white;
+            padding: 80px 60px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            text-align: center;
+        }
+
+        .feature-card {
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        .feature-card .icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 15px 20px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            .hero h1 {
+                font-size: 36px;
+            }
+            .hero p {
+                font-size: 18px;
+            }
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            .features {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">JOB<span>SS4</span></div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs/">Jobs</a>
+            <a href="/login/">Login</a>
+            <a href="/register/" style="background: white; color: #667eea; padding: 10px 25px; border-radius: 50px; font-weight: 600;">Register</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <div class="hero-content">
+            <h1>Find Your Dream Career</h1>
+            <p>Connect with top employers and discover opportunities that match your skills and aspirations. Your journey to success starts here.</p>
+            <div class="hero-buttons">
+                <a href="/register/" class="btn btn-primary">Get Started</a>
+                <a href="/jobs/" class="btn btn-secondary">Browse Jobs</a>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <h3>10K+</h3>
+                    <p>Active Jobs</p>
+                </div>
+                <div class="stat-item">
+                    <h3>5K+</h3>
+                    <p>Companies</p>
+                </div>
+                <div class="stat-item">
+                    <h3>50K+</h3>
+                    <p>Job Seekers</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="features">
+        <div class="feature-card">
+            <div class="icon">💼</div>
+            <h3>Find Jobs</h3>
+            <p>Search thousands of jobs from top companies around the world.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">📝</div>
+            <h3>Apply Easily</h3>
+            <p>Submit applications with one click and track your progress.</p>
+        </div>
+        <div class="feature-card">
+            <div class="icon">🚀</div>
+            <h3>Career Growth</h3>
+            <p>Get recommendations and grow your career with personalized insights.</p>
+        </div>
+    </div>
+</body>
+</html>

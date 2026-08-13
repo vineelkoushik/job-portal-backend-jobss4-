@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height:100vh; display:flex; align-items:center; justify-content:center;
+            background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            padding:20px;
+        }
+        .register-container {
+            background:white; border-radius:20px; padding:50px; width:100%; max-width:480px;
+            box-shadow:0 20px 60px rgba(0,0,0,0.3); animation:slideUp 0.6s ease;
+            max-height:90vh; overflow-y:auto;
+        }
+        @keyframes slideUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:translateY(0); } }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:15px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+
+        .logo-container {
+            text-align:center; margin-bottom:20px;
+        }
+        .logo-svg {
+            width:80px; height:80px; display:inline-block;
+        }
+        .logo-text {
+            display:block; font-size:28px; font-weight:800; color:#333; margin-top:8px; letter-spacing:-0.5px;
+        }
+        .logo-text span { color:#667eea; }
+
+        h2 { font-size:28px; color:#333; margin-bottom:5px; text-align:center; }
+        .subtitle { color:#888; margin-bottom:25px; text-align:center; }
+
+        .form-group { margin-bottom:16px; }
+        .form-group label { display:block; font-weight:600; color:#555; margin-bottom:5px; font-size:13px; }
+        .form-group input, .form-group select {
+            width:100%; padding:12px 14px; border:2px solid #e0e0e0; border-radius:10px;
+            font-size:15px; transition:.3s; outline:none; background:white;
+        }
+        .form-group input:focus, .form-group select:focus {
+            border-color:#667eea; box-shadow:0 0 0 4px rgba(102,126,234,0.1);
+        }
+        .btn-register {
+            width:100%; padding:16px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+            color:white; border:none; border-radius:10px; font-size:18px; font-weight:600;
+            cursor:pointer; transition:.3s; margin-top:10px;
+        }
+        .btn-register:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(102,126,234,0.4); }
+        #message { text-align:center; margin-top:15px; padding:10px; border-radius:8px; font-weight:500; }
+        #message.success { background:#efe; color:#3a3; }
+        #message.error { background:#fee; color:#c33; }
+        .login-link { text-align:center; margin-top:20px; color:#888; }
+        .login-link a { color:#667eea; text-decoration:none; font-weight:600; }
+        .login-link a:hover { text-decoration:underline; }
+
+        @media (max-width:480px) { .register-container { padding:25px 15px; } }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <a href="/" class="back-link">← Back to Home</a>
+
+        <div class="logo-container">
+            <svg class="logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#667eea" />
+                        <stop offset="100%" stop-color="#764ba2" />
+                    </linearGradient>
+                </defs>
+                <circle cx="50" cy="50" r="48" fill="url(#grad)" stroke="white" stroke-width="2"/>
+                <text x="50" y="68" text-anchor="middle" fill="white" font-size="36" font-weight="800" font-family="Arial, sans-serif">JOB</text>
+            </svg>
+            <span class="logo-text">JOB<span>SS4</span></span>
+        </div>
+
+        <h2>Create Account</h2>
+        <p class="subtitle">Join the JOBSS4 community today</p>
+
+        <form id="registerForm" autocomplete="off">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a password" autocomplete="new-password" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone Number</label>
+                <input type="text" id="phone" name="phone" placeholder="Enter phone number" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="Your location" autocomplete="off" required>
+            </div>
+            <div class="form-group">
+                <label for="role">I am a</label>
+                <select id="role" name="role" required>
+                    <option value="">Select your role</option>
+                    <option value="JOB_SEEKER">Job Seeker</option>
+                    <option value="RECRUITER">Recruiter</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="skills">Skills (comma separated)</label>
+                <input type="text" id="skills" name="skills" placeholder="Python, Django, SQL" autocomplete="off">
+            </div>
+            <button type="submit" class="btn-register">Create Account</button>
+        </form>
+        <div id="message"></div>
+        <div class="login-link">
+            Already have an account? <a href="/login/">Sign in</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("registerForm").addEventListener("submit", async function(e) {
+            e.preventDefault();
+            const data = {
+                username: document.getElementById("username").value,
+                email: document.getElementById("email").value,
+                password: document.getElementById("password").value,
+                phone: document.getElementById("phone").value,
+                location: document.getElementById("location").value,
+                role: document.getElementById("role").value,
+                skills: document.getElementById("skills").value
+            };
+            const message = document.getElementById("message");
+            message.textContent = "Creating account...";
+            message.className = "";
+            try {
+                const response = await fetch("/api/auth/register/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    message.textContent = "✓ Account created! Redirecting to login...";
+                    message.className = "success";
+                    setTimeout(() => window.location.href = "/login/", 1500);
+                } else {
+                    message.textContent = JSON.stringify(result);
+                    message.className = "error";
+                }
+            } catch (error) {
+                message.textContent = "Something went wrong.";
+                message.className = "error";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>

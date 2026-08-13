@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications - JOBSS4</title>
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background:#f0f2f5; min-height:100vh; }
+        nav {
+            background:white; padding:18px 40px; display:flex; justify-content:space-between; align-items:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.08); position:sticky; top:0; z-index:100;
+        }
+        nav .brand { font-size:24px; font-weight:800; color:#333; }
+        nav .brand span { color:#667eea; }
+        nav .nav-links { display:flex; gap:25px; align-items:center; }
+        nav a { color:#666; text-decoration:none; font-weight:500; }
+        nav a:hover { color:#667eea; }
+
+        .notification-container { position:relative; display:inline-block; cursor:pointer; }
+        .notification-bell { font-size:24px; color:#666; transition:.3s; background:none; border:none; cursor:pointer; }
+        .notification-bell:hover { color:#667eea; transform:scale(1.1); }
+        .notification-badge {
+            position:absolute; top:-8px; right:-8px; background:#ef4444; color:white; border-radius:50%;
+            padding:2px 7px; font-size:11px; font-weight:700; min-width:20px; text-align:center;
+            animation:pulse 2s infinite;
+        }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.1);} }
+        .notification-dropdown {
+            display:none; position:absolute; right:0; top:45px; width:380px; max-height:500px; overflow-y:auto;
+            background:white; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.15); z-index:1000; padding:10px 0;
+        }
+        .notification-dropdown.show { display:block; animation:slideDown 0.3s ease; }
+        @keyframes slideDown { from{opacity:0;transform:translateY(-10px);} to{opacity:1;transform:translateY(0);} }
+        .notification-dropdown .header {
+            padding:15px 20px; border-bottom:1px solid #f0f0f0; font-weight:700; color:#333; font-size:16px;
+            display:flex; justify-content:space-between; align-items:center; position:sticky; top:0; background:white;
+            border-radius:16px 16px 0 0; z-index:1;
+        }
+        .notification-dropdown .header .mark-read { font-size:13px; color:#667eea; cursor:pointer; font-weight:500; }
+        .notification-dropdown .header .mark-read:hover { text-decoration:underline; }
+        .notification-item { padding:14px 20px; border-bottom:1px solid #f8f9fa; transition:.3s; cursor:pointer; }
+        .notification-item:hover { background:#f8f9fa; }
+        .notification-item.unread { background:#f0f4ff; border-left:3px solid #667eea; }
+        .notification-item .notif-title { font-weight:600; color:#333; font-size:14px; margin-bottom:4px; }
+        .notification-item .notif-message { color:#666; font-size:13px; line-height:1.5; }
+        .notification-item .notif-time { color:#aaa; font-size:11px; margin-top:4px; }
+        .notification-empty { padding:40px 20px; text-align:center; color:#888; }
+        .notification-empty .icon { font-size:48px; margin-bottom:10px; }
+
+        .container { max-width:1200px; margin:0 auto; padding:30px 20px; }
+        .back-link { display:inline-block; color:#667eea; text-decoration:none; font-weight:600; margin-bottom:25px; transition:.3s; }
+        .back-link:hover { transform:translateX(-5px); }
+
+        .page-header {
+            display:flex; justify-content:space-between; align-items:center; margin-bottom:25px; flex-wrap:wrap; gap:15px;
+        }
+        .page-header h1 { font-size:32px; color:#333; }
+
+        .status-filter { display:flex; gap:10px; flex-wrap:wrap; }
+        .status-filter select { padding:10px 16px; border:2px solid #e0e0e0; border-radius:10px; font-size:14px; outline:none; background:white; }
+
+        .application-card {
+            background:white; border-radius:16px; padding:25px; margin-bottom:20px;
+            box-shadow:0 2px 10px rgba(0,0,0,0.06); border-left:5px solid #667eea; transition:.3s;
+        }
+        .application-card:hover { box-shadow:0 8px 30px rgba(0,0,0,0.1); }
+        .application-card .app-header { display:flex; justify-content:space-between; align-items:start; flex-wrap:wrap; gap:15px; }
+        .application-card h2 { color:#333; font-size:20px; }
+        .application-card .sub-info { color:#888; font-size:14px; margin:5px 0 10px; }
+        .application-card .sub-info span { margin-right:20px; }
+
+        .status-badge {
+            display:inline-block; padding:6px 16px; border-radius:50px; font-weight:600; font-size:13px;
+        }
+        .status-badge.PENDING { background:#fef3c7; color:#92400e; }
+        .status-badge.SHORTLISTED { background:#dbeafe; color:#1e40af; }
+        .status-badge.REJECTED { background:#fee2e2; color:#991b1b; }
+        .status-badge.HIRED { background:#d1fae5; color:#065f46; }
+
+        .status-actions { display:flex; gap:10px; margin-top:15px; flex-wrap:wrap; align-items:center; }
+        .status-actions select { padding:8px 14px; border:2px solid #e0e0e0; border-radius:8px; font-size:14px; outline:none; background:white; }
+        .status-actions select:focus { border-color:#667eea; }
+        .btn-update { padding:8px 20px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:.3s; }
+        .btn-update:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(102,126,234,0.4); }
+
+        .resume-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+        .btn-resume { padding:8px 18px; background:#10b981; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:.3s; font-size:13px; }
+        .btn-resume:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(16,185,129,0.4); }
+        .btn-profile { padding:8px 18px; background:#6366f1; color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer; transition:.3s; font-size:13px; }
+        .btn-profile:hover { transform:translateY(-2px); box-shadow:0 4px 15px rgba(99,102,241,0.4); }
+
+        .modal-overlay {
+            display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:2000;
+            justify-content:center; align-items:center; padding:20px;
+        }
+        .modal-overlay.active { display:flex; }
+        .modal-content {
+            background:white; border-radius:20px; padding:30px; max-width:800px; width:100%;
+            max-height:90vh; overflow-y:auto; position:relative;
+        }
+        .modal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:15px; border-bottom:2px solid #f0f0f0; }
+        .modal-header h2 { font-size:24px; color:#333; }
+        .modal-close { background:none; border:none; font-size:28px; cursor:pointer; color:#888; transition:.3s; padding:0 10px; }
+        .modal-close:hover { color:#333; transform:rotate(90deg); }
+        .modal-body { padding:10px 0; }
+        .modal-body .resume-preview { width:100%; min-height:500px; border:2px solid #e8ecf1; border-radius:10px; background:white; }
+        .modal-body .resume-preview iframe { width:100%; height:600px; border:none; border-radius:10px; }
+
+        .profile-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+        .profile-field { padding:10px 0; border-bottom:1px solid #f0f0f0; }
+        .profile-field .label { font-size:12px; color:#aaa; text-transform:uppercase; letter-spacing:0.5px; }
+        .profile-field .value { font-size:16px; color:#333; font-weight:500; margin-top:2px; }
+
+        .no-applications { text-align:center; padding:60px 20px; color:#888; font-size:18px; }
+        .toast { position:fixed; bottom:30px; right:30px; padding:16px 30px; border-radius:12px; color:white; font-weight:600; z-index:3000; animation:slideIn 0.5s ease; box-shadow:0 8px 30px rgba(0,0,0,0.2); }
+        .toast.success { background:#10b981; }
+        .toast.error { background:#ef4444; }
+        @keyframes slideIn { from{opacity:0;transform:translateX(100px);} to{opacity:1;transform:translateX(0);} }
+        .loading-spinner { display:inline-block; width:20px; height:20px; border:3px solid #f0f0f0; border-top:3px solid #667eea; border-radius:50%; animation:spin 0.8s linear infinite; }
+        @keyframes spin { 0%{transform:rotate(0deg);} 100%{transform:rotate(360deg);} }
+
+        @media (max-width:768px) {
+            nav { flex-direction:column; gap:10px; padding:15px 20px; }
+            .page-header { flex-direction:column; align-items:flex-start; }
+            .profile-grid { grid-template-columns:1fr; }
+            .modal-content { padding:20px; margin:10px; }
+            .modal-body .resume-preview iframe { height:400px; }
+            .notification-dropdown { width:300px; right:-80px; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="brand">JOB<span>SS4</span></div>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/jobs/">Jobs</a>
+            <a href="/dashboard/">Dashboard</a>
+            <a href="/saved-jobs/">Saved Jobs</a>
+
+            <div class="notification-container">
+                <button class="notification-bell" onclick="toggleNotifications()">
+                    🔔
+                    <span class="notification-badge" id="notifBadge" style="display:none;">0</span>
+                </button>
+                <div class="notification-dropdown" id="notifDropdown">
+                    <div class="header">
+                        <span>📬 Notifications</span>
+                        <span class="mark-read" onclick="markAllRead()">Mark all read</span>
+                    </div>
+                    <div id="notifList">
+                        <div class="notification-empty">
+                            <div class="icon">📭</div>
+                            <p>No notifications</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <a href="/dashboard/" class="back-link">← Back to Dashboard</a>
+
+        <div class="page-header">
+            <h1>📋 Applications</h1>
+            <div class="status-filter">
+                <select id="statusFilter" onchange="loadApplications()">
+                    <option value="">All Status</option>
+                    <option value="PENDING">Pending</option>
+                    <option value="SHORTLISTED">Shortlisted</option>
+                    <option value="REJECTED">Rejected</option>
+                    <option value="HIRED">Hired</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="applications">
+            <div style="text-align:center;padding:40px;color:#888;">Loading applications...</div>
+        </div>
+    </div>
+
+    <!-- Resume Modal -->
+    <div class="modal-overlay" id="resumeModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="resumeModalTitle">📄 Resume</h2>
+                <button class="modal-close" onclick="closeModal('resumeModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="resumeContent">
+                    <div style="text-align:center;padding:20px;">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:10px;color:#888;">Loading resume...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="profileModalTitle">👤 Applicant Profile</h2>
+                <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div id="profileContent">
+                    <div style="text-align:center;padding:20px;">
+                        <div class="loading-spinner"></div>
+                        <p style="margin-top:10px;color:#888;">Loading profile...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const token = localStorage.getItem("access_token");
+        if (!token) window.location.href = "/login/";
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', function(e) {
+                if (e.target === this) { this.classList.remove('active'); document.body.style.overflow = 'auto'; }
+            });
+        });
+
+        async function viewResume(applicationId, applicantUsername) {
+            const modal = document.getElementById('resumeModal');
+            const title = document.getElementById('resumeModalTitle');
+            const content = document.getElementById('resumeContent');
+            title.textContent = `📄 Resume - ${applicantUsername}`;
+            content.innerHTML = `<div style="text-align:center;padding:20px;"><div class="loading-spinner"></div><p style="margin-top:10px;color:#888;">Loading resume...</p></div>`;
+            openModal('resumeModal');
+            try {
+                const response = await fetch(`/api/jobs/applications/${applicationId}/applicant-profile/`, {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok && data.resume) {
+                    content.innerHTML = `
+                        <div class="resume-info"><p>📎 <strong>${applicantUsername}</strong>'s resume is ready for review.</p></div>
+                        <div class="resume-preview"><iframe src="${data.resume}#toolbar=1" title="Resume"></iframe></div>
+                        <div style="margin-top:15px;text-align:center;">
+                            <a href="${data.resume}" download class="btn-resume" style="text-decoration:none;">📥 Download Resume</a>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `<div style="text-align:center;padding:60px;color:#888;"><div style="font-size:64px;margin-bottom:15px;">📄</div><h3>No Resume Uploaded</h3><p>${applicantUsername} has not uploaded a resume yet.</p></div>`;
+                }
+            } catch (error) {
+                content.innerHTML = `<div style="text-align:center;padding:60px;color:#888;"><div style="font-size:64px;margin-bottom:15px;">❌</div><h3>Error Loading Resume</h3><p>Could not load the resume.</p></div>`;
+            }
+        }
+
+        async function viewApplicantProfile(applicationId) {
+            const modal = document.getElementById('profileModal');
+            const title = document.getElementById('profileModalTitle');
+            const content = document.getElementById('profileContent');
+            title.textContent = '👤 Applicant Profile';
+            content.innerHTML = `<div style="text-align:center;padding:20px;"><div class="loading-spinner"></div><p style="margin-top:10px;color:#888;">Loading profile...</p></div>`;
+            openModal('profileModal');
+            try {
+                const response = await fetch(`/api/jobs/applications/${applicationId}/applicant-profile/`, {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    content.innerHTML = `
+                        <div class="profile-grid">
+                            <div class="profile-field"><div class="label">Username</div><div class="value">${data.username || '-'}</div></div>
+                            <div class="profile-field"><div class="label">Role</div><div class="value">${data.role || '-'}</div></div>
+                            <div class="profile-field"><div class="label">Phone</div><div class="value">${data.phone || '-'}</div></div>
+                            <div class="profile-field"><div class="label">Location</div><div class="value">${data.location || '-'}</div></div>
+                            <div class="profile-field" style="grid-column:1/-1;">
+                                <div class="label">Skills</div>
+                                <div class="value">${data.skills ? data.skills.split(',').map(s => `<span style="display:inline-block;background:#e8ecf1;padding:2px 12px;border-radius:15px;margin:3px;font-size:13px;">${s.trim()}</span>`).join('') : '-'}</div>
+                            </div>
+                            <div class="profile-field" style="grid-column:1/-1;">
+                                <div class="label">Resume</div>
+                                <div class="value">${data.resume ? `<a href="${data.resume}" target="_blank" class="btn-resume" style="text-decoration:none;display:inline-block;">📄 View Resume</a>` : '❌ Not uploaded'}</div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    content.innerHTML = `<div style="text-align:center;padding:40px;color:#888;"><div style="font-size:48px;">❌</div><p>Failed to load profile.</p></div>`;
+                }
+            } catch (error) {
+                content.innerHTML = `<div style="text-align:center;padding:40px;color:#888;"><div style="font-size:48px;">❌</div><p>Something went wrong.</p></div>`;
+            }
+        }
+
+        async function loadApplications() {
+            const container = document.getElementById("applications");
+            container.innerHTML = '<div style="text-align:center;padding:40px;color:#888;">Loading...</div>';
+            try {
+                let response = await fetch("/api/jobs/applications/recruiter/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                if (!response.ok) {
+                    response = await fetch("/api/jobs/applications/my/", {
+                        headers: { "Authorization": "Bearer " + token }
+                    });
+                }
+                const data = await response.json();
+                if (!response.ok) {
+                    container.innerHTML = `<div class="no-applications">❌ ${data.error || "Failed to load"}</div>`;
+                    return;
+                }
+                displayApplications(data);
+            } catch (error) {
+                console.error(error);
+                container.innerHTML = '<div class="no-applications">Something went wrong.</div>';
+            }
+        }
+
+        function displayApplications(apps) {
+            const container = document.getElementById("applications");
+            container.innerHTML = "";
+            const statusFilter = document.getElementById("statusFilter").value;
+            let filtered = apps;
+            if (statusFilter) { filtered = apps.filter(app => app.status === statusFilter); }
+            if (!filtered || filtered.length === 0) {
+                container.innerHTML = '<div class="no-applications">📭 No applications found.</div>';
+                return;
+            }
+            filtered.forEach(app => {
+                const div = document.createElement("div");
+                div.className = "application-card";
+                div.style.borderLeftColor = getStatusColor(app.status);
+                const isRecruiter = app.job_title !== undefined;
+                if (isRecruiter) {
+                    div.innerHTML = `
+                        <div class="app-header">
+                            <div class="app-main">
+                                <h2>${app.job_title}</h2>
+                                <div class="sub-info">
+                                    <span>👤 ${app.applicant_username || app.applicant}</span>
+                                    <span>📅 ${new Date(app.applied_at).toLocaleDateString()}</span>
+                                </div>
+                                <div class="resume-actions">
+                                    <button class="btn-resume" onclick="viewResume(${app.id}, '${app.applicant_username || 'Applicant'}')">📄 View Resume</button>
+                                    <button class="btn-profile" onclick="viewApplicantProfile(${app.id})">👤 View Profile</button>
+                                </div>
+                            </div>
+                            <span class="status-badge ${app.status}">${app.status}</span>
+                        </div>
+                        <div class="status-actions">
+                            <select id="statusSelect_${app.id}" class="status-select">
+                                <option value="PENDING" ${app.status === "PENDING" ? "selected" : ""}>Pending</option>
+                                <option value="SHORTLISTED" ${app.status === "SHORTLISTED" ? "selected" : ""}>Shortlisted</option>
+                                <option value="REJECTED" ${app.status === "REJECTED" ? "selected" : ""}>Rejected</option>
+                                <option value="HIRED" ${app.status === "HIRED" ? "selected" : ""}>Hired</option>
+                            </select>
+                            <button class="btn-update" onclick="updateStatus(${app.id})">Update Status</button>
+                        </div>
+                    `;
+                } else {
+                    div.innerHTML = `
+                        <div class="app-header">
+                            <div>
+                                <h2>${app.job_title || "Application"}</h2>
+                                <div class="sub-info">
+                                    <span>🏢 ${app.company || "Company"}</span>
+                                    <span>📅 ${new Date(app.applied_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            <span class="status-badge ${app.status}">${app.status}</span>
+                        </div>
+                        <div style="margin-top:10px;color:#888;font-size:14px;">
+                            Status: <strong>${app.status}</strong>
+                            ${app.status === "SHORTLISTED" ? ' ⭐ You\'ve been shortlisted!' : ''}
+                            ${app.status === "HIRED" ? ' 🎉 Congratulations! You\'re hired!' : ''}
+                            ${app.status === "REJECTED" ? ' 💔 Application was rejected' : ''}
+                        </div>
+                    `;
+                }
+                container.appendChild(div);
+            });
+        }
+
+        function getStatusColor(status) {
+            const colors = { "PENDING":"#f59e0b", "SHORTLISTED":"#3b82f6", "REJECTED":"#ef4444", "HIRED":"#10b981" };
+            return colors[status] || "#667eea";
+        }
+
+        async function updateStatus(applicationId) {
+            const select = document.getElementById(`statusSelect_${applicationId}`);
+            const newStatus = select.value;
+            try {
+                const response = await fetch(`/api/jobs/applications/${applicationId}/status/`, {
+                    method: "PATCH",
+                    headers: {
+                        "Authorization": "Bearer " + token,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showToast("✅ Status updated successfully! Candidate will be notified.", "success");
+                    loadApplications();
+                    loadNotifications();
+                } else {
+                    showToast("❌ Failed to update: " + JSON.stringify(data), "error");
+                }
+            } catch (error) {
+                console.error(error);
+                showToast("❌ Something went wrong", "error");
+            }
+        }
+
+        function showToast(message, type) {
+            const existing = document.querySelector(".toast");
+            if (existing) existing.remove();
+            const toast = document.createElement("div");
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        }
+
+        // ========== NOTIFICATIONS ==========
+        async function loadNotifications() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", {
+                    headers: { "Authorization": "Bearer " + token }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    displayNotifications(data);
+                    updateBadge(data);
+                }
+            } catch (error) { console.error("Error loading notifications:", error); }
+        }
+        function displayNotifications(notifications) {
+            const list = document.getElementById("notifList");
+            if (!notifications || notifications.length === 0) {
+                list.innerHTML = `<div class="notification-empty"><div class="icon">📭</div><p>No notifications</p></div>`;
+                return;
+            }
+            list.innerHTML = notifications.map(notif => `
+                <div class="notification-item ${notif.is_read ? '' : 'unread'}" onclick="markRead(${notif.id})">
+                    <div class="notif-title">${getNotifIcon(notif.notification_type)} ${notif.notification_type.replace('_', ' ')}</div>
+                    <div class="notif-message">${notif.message}</div>
+                    <div class="notif-time">${new Date(notif.created_at).toLocaleString()}</div>
+                </div>
+            `).join('');
+        }
+        function getNotifIcon(type) {
+            const icons = { 'APPLICATION_SHORTLISTED':'⭐', 'APPLICATION_REJECTED':'❌', 'APPLICATION_HIRED':'🎉', 'NEW_APPLICATION':'📩', 'APPLICATION_SUBMITTED':'📝' };
+            return icons[type] || '📌';
+        }
+        function updateBadge(notifications) {
+            const badge = document.getElementById("notifBadge");
+            const unread = notifications ? notifications.filter(n => !n.is_read).length : 0;
+            if (unread > 0) { badge.textContent = unread; badge.style.display = 'block'; } else { badge.style.display = 'none'; }
+        }
+        function toggleNotifications() {
+            const dropdown = document.getElementById("notifDropdown");
+            dropdown.classList.toggle("show");
+            if (dropdown.classList.contains("show")) { loadNotifications(); }
+        }
+        async function markRead(notifId) {
+            try {
+                await fetch(`/api/jobs/notifications/${notifId}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                loadNotifications();
+            } catch (error) { console.error("Error marking read:", error); }
+        }
+        async function markAllRead() {
+            try {
+                const response = await fetch("/api/jobs/notifications/", { headers: { "Authorization": "Bearer " + token } });
+                const data = await response.json();
+                for (const notif of data) {
+                    if (!notif.is_read) {
+                        await fetch(`/api/jobs/notifications/${notif.id}/read/`, { method: "PATCH", headers: { "Authorization": "Bearer " + token } });
+                    }
+                }
+                loadNotifications();
+                document.getElementById("notifDropdown").classList.remove("show");
+            } catch (error) { console.error("Error marking all read:", error); }
+        }
+        document.addEventListener('click', function(e) {
+            const container = document.querySelector('.notification-container');
+            if (container && !container.contains(e.target)) { document.getElementById('notifDropdown').classList.remove('show'); }
+        });
+        setInterval(loadNotifications, 30000);
+
+        loadApplications();
+        loadNotifications();
+    </script>
+</body>
+</html>
